@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CheckCircle, XCircle, Award, Heart, Star, ArrowRight, Calendar, TrendingUp } from 'lucide-react'
+import { CheckCircle, Award, Heart, Star, ArrowRight, Calendar, TrendingUp } from 'lucide-react'
 import type { ManualRule } from '../../types/game'
 
 interface DayReportModalProps {

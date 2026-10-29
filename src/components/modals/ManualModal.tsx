@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronRight, ChevronDown, Shield, BookOpen, Search, Eye } from 'lucide-react'
+import { X, ChevronRight, Shield, BookOpen, Search, Eye } from 'lucide-react'
 import type { ManualRule, ThreatCategory } from '../../types/game'
 
 interface ManualModalProps {

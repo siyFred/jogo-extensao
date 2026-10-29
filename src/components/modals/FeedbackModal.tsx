@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, XCircle, AlertTriangle, ChevronRight, Award, Heart } from 'lucide-react'
-import type { FeedbackTicket, Discrepancy } from '../../hooks/useGameEngine'
+import type { FeedbackTicket } from '../../hooks/useGameEngine'
+import type { Discrepancy } from '../../types/game'
 
 interface FeedbackModalProps {
   ticket: FeedbackTicket
@@ -197,7 +198,7 @@ export function FeedbackModal({ ticket, onClose, onNext }: FeedbackModalProps) {
                 Discrepâncias do Caso
               </h3>
               <div className="space-y-2">
-                {discrepancies.map((disc) => (
+                {discrepancies.map((disc: Discrepancy) => (
                   <DiscrepancyItem
                     key={disc.id}
                     discrepancy={disc}

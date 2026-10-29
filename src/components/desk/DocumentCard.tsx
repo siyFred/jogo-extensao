@@ -1,5 +1,5 @@
-import { motion, HTMLMotionProps } from 'framer-motion'
-import { Eye, EyeOff, Search, FileText, Mail, QrCode, CreditCard, BadgeCheck, Lock, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Eye, EyeOff, Search, FileText, Mail, QrCode, BadgeCheck, Lock, AlertTriangle } from 'lucide-react'
 import type { Document, DocumentField } from '../../types/game'
 
 interface DocumentCardProps {
@@ -34,15 +34,15 @@ function FieldRow({ field, xrayActive, onClick }: { field: DocumentField; xrayAc
   if (isHidden && !xrayActive) {
     return (
       <motion.div
-        className="px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700"
+        className="px-2.5 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700"
         layout
       >
-        <div className="flex items-center gap-2 text-slate-500">
-          <EyeOff className="w-4 h-4" />
-          <span className="text-sm font-mono text-slate-400">{field.label}</span>
-          <span className="text-xs text-slate-600 uppercase">oculto</span>
+        <div className="flex items-center gap-1.5 text-slate-500">
+          <EyeOff className="w-3.5 h-3.5" />
+          <span className="text-xs font-mono text-slate-400">{field.label}</span>
+          <span className="text-[10px] text-slate-600 uppercase">oculto</span>
           <motion.span
-            className="ml-auto px-2 py-0.5 bg-slate-700/50 rounded text-xs text-slate-400"
+            className="ml-auto px-1.5 py-0.5 bg-slate-700/50 rounded text-[10px] text-slate-400"
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             whileHover={{ scale: 1.02 }}
@@ -54,29 +54,29 @@ function FieldRow({ field, xrayActive, onClick }: { field: DocumentField; xrayAc
     )
   }
 
-  const displayValue = field.type === 'url' && field.value.length > 50
-    ? field.value.substring(0, 50) + '...'
+  const displayValue = field.type === 'url' && field.value.length > 45
+    ? field.value.substring(0, 45) + '...'
     : field.value
 
   return (
     <motion.div
-      className={`px-3 py-2 rounded-lg border transition-colors ${
+      className={`px-2.5 py-1.5 rounded-lg border transition-colors ${
         xrayActive && !field.visible
           ? 'bg-amber-900/30 border-amber-600/50'
           : 'bg-slate-800/50 border-slate-700'
       }`}
       layout
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 }}
+      transition={{ delay: 0.03 }}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">{field.label}</span>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{field.label}</span>
             {xrayActive && !field.visible && (
               <motion.span
-                className="px-1.5 py-0.5 bg-amber-600/30 text-amber-300 rounded text-xs font-mono"
+                className="px-1 py-0.5 bg-amber-600/30 text-amber-300 rounded text-[10px] font-mono"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
               >
@@ -84,28 +84,28 @@ function FieldRow({ field, xrayActive, onClick }: { field: DocumentField; xrayAc
               </motion.span>
             )}
             {isSuspicious && (
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+              <AlertTriangle className="w-3 h-3 text-amber-400 flex-shrink-0" />
             )}
           </div>
           
-          <div className="flex items-center gap-2">
-            <span className={`font-mono text-sm break-all ${
+          <div className="flex items-center gap-1.5">
+            <span className={`font-mono text-xs break-all ${
               isSuspicious ? 'text-amber-300' : 'text-slate-100'
             }`}>
               {displayValue}
             </span>
-            {field.type === 'url' && field.value.length > 50 && (
-              <span className="text-xs text-slate-500 flex-shrink-0">(truncado)</span>
+            {field.type === 'url' && field.value.length > 45 && (
+              <span className="text-[10px] text-slate-500 flex-shrink-0">(truncado)</span>
             )}
           </div>
 
           {field.suspiciousHint && (xrayActive || isSuspicious) && (
             <motion.p
-              className="mt-1.5 text-xs text-amber-300/90 flex items-center gap-1"
+              className="mt-1 text-[10px] text-amber-300/90 flex items-center gap-0.5"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
             >
-              <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+              <AlertTriangle className="w-2.5 h-2.5 flex-shrink-0" />
               {field.suspiciousHint}
             </motion.p>
           )}
@@ -114,11 +114,11 @@ function FieldRow({ field, xrayActive, onClick }: { field: DocumentField; xrayAc
         {onClick && (
           <motion.button
             onClick={onClick}
-            className="p-1.5 text-slate-500 hover:text-slate-200 rounded transition-colors flex-shrink-0"
+            className="p-1 text-slate-500 hover:text-slate-200 rounded transition-colors flex-shrink-0"
             whileTap={{ scale: 0.9 }}
             aria-label={`Inspecionar ${field.label}`}
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-3.5 h-3.5" />
           </motion.button>
         )}
       </div>
@@ -128,16 +128,20 @@ function FieldRow({ field, xrayActive, onClick }: { field: DocumentField; xrayAc
 
 export function DocumentCard({ document, xrayActive, onFieldClick, index }: DocumentCardProps) {
   const Icon = getDocumentIcon(document.type)
-  const visibleFields = document.fields.filter((f) => f.visible || xrayActive)
   const hiddenCount = document.fields.filter((f) => !f.visible).length
   const revealedHiddenCount = document.fields.filter((f) => !f.visible && xrayActive).length
 
+  // Staggered initial positions for stacking effect
+  const initialRotate = (index % 2 === 0 ? -2 : 2)
+  const initialY = 20 + index * 8
+  const initialX = (index % 2 === 0 ? -15 : 15)
+
   // Calculate drag constraints based on viewport
   const constraints = {
-    top: -100,
-    bottom: 100,
-    left: -150,
-    right: 150,
+    top: -80,
+    bottom: 80,
+    left: -120,
+    right: 120,
   }
 
   return (
@@ -149,38 +153,38 @@ export function DocumentCard({ document, xrayActive, onFieldClick, index }: Docu
         xrayActive && revealedHiddenCount > 0 ? 'ring-2 ring-amber-500/50' : ''
       }`}
       style={{ zIndex: 10 + index }}
-      initial={{ opacity: 0, y: 30, rotate: (index % 2 === 0 ? -3 : 3) }}
-      animate={{ opacity: 1, y: 0, rotate: 0 }}
-      transition={{ delay: 0.1 * index, type: 'spring', stiffness: 100 }}
-      whileHover={{ scale: 1.01, boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5)' }}
-      whileDrag={{ scale: 1.02, rotate: 0, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.6)', zIndex: 999 }}
+      initial={{ opacity: 0, y: initialY, x: initialX, rotate: initialRotate }}
+      animate={{ opacity: 1, y: 0, x: 0, rotate: 0 }}
+      transition={{ delay: 0.08 * index, type: 'spring', stiffness: 120 }}
+      whileHover={{ scale: 1.01, boxShadow: '0 15px 30px -8px rgba(0,0,0,0.5)' }}
+      whileDrag={{ scale: 1.02, rotate: 0, boxShadow: '0 20px 40px -10px rgba(0,0,0,0.6)', zIndex: 999 }}
     >
       {/* Document Header */}
-      <div className="flex items-center justify-between p-3 border-b border-slate-700/50 bg-slate-900/30 rounded-t-xl">
-        <div className="flex items-center gap-2">
-          <Icon className="w-5 h-5 text-slate-400" />
-          <span className="font-medium text-slate-100">{document.type}</span>
+      <div className="flex items-center justify-between p-2 border-b border-slate-700/50 bg-slate-900/30 rounded-t-xl">
+        <div className="flex items-center gap-1.5">
+          <Icon className="w-4 h-4 text-slate-400" />
+          <span className="font-medium text-xs text-slate-100">{document.type}</span>
         </div>
         
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {hiddenCount > 0 && (
             <motion.div
-              className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono ${
+              className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono ${
                 xrayActive && revealedHiddenCount > 0
                   ? 'bg-amber-900/30 text-amber-300 border border-amber-600/30'
                   : 'bg-slate-700/50 text-slate-500'
               }`}
               layout
             >
-              <Eye className="w-3 h-3" />
+              <Eye className="w-2.5 h-2.5" />
               <span>{revealedHiddenCount}/{hiddenCount}</span>
             </motion.div>
           )}
         </div>
       </div>
 
-      {/* Document Fields */}
-      <div className="p-3 space-y-2 max-h-[300px] overflow-y-auto no-scrollbar">
+      {/* Document Fields - no internal scroll, let parent handle */}
+      <div className="p-2.5 space-y-1.5">
         {document.fields.map((field) => (
           <FieldRow
             key={field.id}
@@ -193,13 +197,13 @@ export function DocumentCard({ document, xrayActive, onFieldClick, index }: Docu
         {/* Hidden fields section when X-Ray is active */}
         {xrayActive && document.hiddenFields && document.hiddenFields.length > 0 && (
           <motion.div
-            className="pt-2 border-t border-amber-600/30"
+            className="pt-1.5 border-t border-amber-600/30"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
           >
-            <div className="flex items-center gap-2 mb-2 text-amber-300 text-xs font-mono">
-              <Lock className="w-3.5 h-3.5" />
-              <span>CAMPOS OCULTOS (Raio-X)</span>
+            <div className="flex items-center gap-1.5 mb-1.5 text-amber-300 text-[10px] font-mono">
+              <Lock className="w-3 h-3" />
+              <span>CAMPOS OCULTOS</span>
             </div>
             {document.hiddenFields.map((field) => (
               <FieldRow

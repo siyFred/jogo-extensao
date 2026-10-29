@@ -2,19 +2,15 @@ import { useState, useCallback, useMemo } from 'react'
 import type {
   TravelerCase,
   GameState,
-  GamePhase,
   PlayerDecision,
-  CorrectDecision,
   Discrepancy,
-  DayNumber,
-  ManualRule,
   ToolType,
   CaseEvaluation,
 } from '../types/game'
-import { getCasesForDay, getRulesForDay } from '../data/cases'
-import { manualRules } from '../data/manualRules'
+import { getCasesForDay } from '../data/cases'
+import { getRulesForDay } from '../data/manualRules'
 
-interface FeedbackTicket {
+export interface FeedbackTicket {
   isOpen: boolean
   isCorrect: boolean
   pointsEarned: number
@@ -43,7 +39,7 @@ interface UseGameEngineReturn {
 
 function createInitialGameState(): GameState {
   const day1Cases = getCasesForDay(1)
-  const day1Rules = getRulesForDay(1).map((id) => manualRules.find((r) => r.id === id)!).filter(Boolean)
+  const day1Rules = getRulesForDay(1)
   
   return {
     currentDay: 1,
@@ -74,7 +70,6 @@ function evaluateCase(
   
   // Discrepâncias que são "blocking" = essenciais para barrar
   const blockingDiscrepancies = currentCase.discrepancies.filter((d) => d.isBlocking)
-  const nonBlockingDiscrepancies = currentCase.discrepancies.filter((d) => !d.isBlocking)
   
   // Se o jogador barrou, considera que encontrou as blocking
   // Se aprovou, considera que perdeu as blocking

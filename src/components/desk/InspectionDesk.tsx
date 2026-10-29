@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ClipboardList, MagnifyingGlass, Sparkles } from 'lucide-react'
+import { ClipboardList, Search, Sparkles } from 'lucide-react'
 import { DocumentCard } from './DocumentCard'
 import type { TravelerCase, DocumentField } from '../../types/game'
 
@@ -17,9 +17,9 @@ export function InspectionDesk({ currentCase, xrayActive, onFieldInspect }: Insp
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <ClipboardList className="w-16 h-16 text-slate-700 mb-4" />
-        <p className="text-slate-500 text-lg">Nenhum documento para inspecionar</p>
-        <p className="text-slate-600 text-sm mt-1">Aguardando viajante...</p>
+        <ClipboardList className="w-12 h-12 text-slate-700 mb-3" />
+        <p className="text-slate-500 text-base">Nenhum documento para inspecionar</p>
+        <p className="text-slate-600 text-xs mt-1">Aguardando viajante...</p>
       </motion.div>
     )
   }
@@ -29,9 +29,9 @@ export function InspectionDesk({ currentCase, xrayActive, onFieldInspect }: Insp
   return (
     <motion.section
       className="flex flex-1 min-h-0 w-full overflow-hidden relative"
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1 }}
+      transition={{ duration: 0.3, delay: 0.1 }}
     >
       {/* Desk surface */}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-900/30 via-slate-900/10 to-slate-900/30" />
@@ -51,25 +51,25 @@ export function InspectionDesk({ currentCase, xrayActive, onFieldInspect }: Insp
       {/* X-Ray overlay indicator */}
       {xrayActive && (
         <motion.div
-          className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-1.5 bg-amber-900/40 border border-amber-600/50 rounded-lg backdrop-blur-sm"
+          className="absolute top-2 right-2 z-20 flex items-center gap-1.5 px-2 py-1 bg-amber-900/40 border border-amber-600/50 rounded-lg backdrop-blur-sm"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 200 }}
         >
           <motion.div
-            className="w-2 h-2 bg-amber-400 rounded-full"
+            className="w-1.5 h-1.5 bg-amber-400 rounded-full"
             animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
             transition={{ duration: 1, repeat: Infinity }}
           />
-          <span className="text-xs font-mono text-amber-300 uppercase tracking-wider">Raio-X Ativo</span>
-          <Sparkles className="w-4 h-4 text-amber-400" />
+          <span className="text-[10px] font-mono text-amber-300 uppercase tracking-wider">Raio-X</span>
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
         </motion.div>
       )}
 
-      {/* Documents area */}
-      <div className="relative z-10 h-full w-full p-4 overflow-y-auto no-scrollbar">
+      {/* Documents area - no scroll, fills available space */}
+      <div className="relative z-10 h-full w-full p-2 overflow-hidden">
         <motion.div
-          className="flex flex-col gap-4 max-w-sm mx-auto w-full"
+          className="flex flex-col gap-2.5 max-w-sm mx-auto w-full h-full"
           layout
         >
           {documents.map((doc, i) => (
@@ -84,22 +84,22 @@ export function InspectionDesk({ currentCase, xrayActive, onFieldInspect }: Insp
 
           {/* Empty state hint */}
           {documents.length === 0 && (
-            <motion.div className="text-center py-12 text-slate-600">
-              <MagnifyingGlass className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">Arraste documentos para inspecionar</p>
+            <motion.div className="flex-1 flex flex-col items-center justify-center text-slate-600">
+              <Search className="w-8 h-8 mx-auto mb-1.5 opacity-30" />
+              <p className="text-xs">Arraste para inspecionar</p>
             </motion.div>
           )}
         </motion.div>
       </div>
 
-      {/* Drop zone hint */}
+      {/* Drop zone hint - only show when not too cramped */}
       <motion.div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 text-slate-600/50 text-xs font-mono"
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-slate-600/50 text-[10px] font-mono"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
+        transition={{ delay: 0.6, duration: 0.4 }}
       >
-        <kbd className="px-2 py-1 bg-slate-800/50 rounded border border-slate-700">Arrastar</kbd>
+        <kbd className="px-1.5 py-0.5 bg-slate-800/50 rounded border border-slate-700">Arrastar</kbd>
         <span>para reposicionar</span>
       </motion.div>
     </motion.section>

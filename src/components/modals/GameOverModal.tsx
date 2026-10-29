@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
-import { Skull, RefreshCw, Award, Heart, AlertTriangle, ChevronRight } from 'lucide-react'
-import type { ManualRule } from '../../types/game'
+import { Skull, RefreshCw, Award, Heart, AlertTriangle } from 'lucide-react'
 
 interface GameOverModalProps {
   finalScore: number

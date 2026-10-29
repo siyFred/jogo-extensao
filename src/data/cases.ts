@@ -5,7 +5,6 @@ import type {
   Discrepancy,
   CaseId,
   DayNumber,
-  CorrectDecision,
   ThreatCategory,
   Severity,
 } from '../types/game'

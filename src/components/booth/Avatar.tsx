@@ -1,4 +1,4 @@
-import { User, ShieldCheck, AlertTriangle, Loader2 } from 'lucide-react'
+import { ShieldCheck, AlertTriangle, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 type AvatarType = 'traveler' | 'approved' | 'denied' | 'loading'
@@ -27,7 +27,7 @@ export function Avatar({ avatarId, type, className = '' }: AvatarProps) {
 
   return (
     <motion.div
-      className={`relative w-24 h-24 md:w-28 md:h-28 rounded-2xl ${style.bg} flex items-center justify-center overflow-hidden ${className}`}
+      className={`relative w-14 h-14 rounded-2xl ${style.bg} flex items-center justify-center overflow-hidden ${className}`}
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -47,20 +47,20 @@ export function Avatar({ avatarId, type, className = '' }: AvatarProps) {
       {/* Avatar content */}
       <div className="relative z-10 flex items-center justify-center">
         {isLoading ? (
-          <Loader2 className="w-10 h-10 text-slate-200/80 animate-spin" />
+          <Loader2 className="w-6 h-6 text-slate-200/80 animate-spin" />
         ) : type === 'approved' ? (
-          <ShieldCheck className="w-12 h-12 text-green-400" strokeWidth={2.5} />
+          <ShieldCheck className="w-7 h-7 text-green-400" strokeWidth={2.5} />
         ) : type === 'denied' ? (
-          <AlertTriangle className="w-12 h-12 text-red-400" strokeWidth={2.5} />
+          <AlertTriangle className="w-7 h-7 text-red-400" strokeWidth={2.5} />
         ) : (
-          <span className="text-5xl md:text-6xl" aria-hidden="true">{style.icon}</span>
+          <span className="text-3xl" aria-hidden="true">{style.icon}</span>
         )}
       </div>
 
       {/* Status ring */}
       {!isLoading && (
         <motion.div
-          className={`absolute inset-0 rounded-2xl border-4 ${
+          className={`absolute inset-0 rounded-2xl border-3 ${
             type === 'approved'
               ? 'border-green-400'
               : type === 'denied'
