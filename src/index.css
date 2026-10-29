@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile scroll/refresh blocking - AGENTS.md requirement */
+#root {
+  height: 100dvh;
+  width: 100%;
+  max-width: 28rem; /* max-w-md = 28rem */
+  margin: 0 auto;
+  overflow: hidden;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* Prevent pull-to-refresh on mobile for draggable cards */
+[motion-div] {
+  touch-action: none;
+}
+
+/* Pixel art rendering for sprites/avatars */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Hide scrollbar but allow scrolling when needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900;
+}
