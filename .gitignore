@@ -1,7 +1,12 @@
 AGENTS.md
 SPEC.md
 
+node_modules/
 .npm-cache/
+dist/
+build/
+.env
+package-lock.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,react
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,react

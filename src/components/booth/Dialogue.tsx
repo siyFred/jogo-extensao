@@ -10,10 +10,10 @@ interface DialogueProps {
 export function Dialogue({ text, travelerName, isTyping = false }: DialogueProps) {
   return (
     <motion.div
-      className="relative mx-3 mt-2 px-3 py-2 bg-slate-800/60 rounded-lg border border-slate-700 max-h-[120px] overflow-hidden"
-      initial={{ y: 15, opacity: 0 }}
+      className="relative mx-2 mt-1.5 px-2.5 py-1.5 bg-slate-800/60 rounded-lg border border-slate-700 max-h-[70px] overflow-hidden"
+      initial={{ y: 10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.3, delay: 0.15 }}
+      transition={{ duration: 0.25, delay: 0.1 }}
     >
       {/* Speaker indicator */}
       <div className="flex items-center gap-1.5 mb-1">

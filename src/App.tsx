@@ -1,6 +1,7 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useGameEngine } from './hooks/useGameEngine'
+import { MousePointerClick } from 'lucide-react'
 import { Booth } from './components/booth/Booth'
 import { InspectionDesk } from './components/desk/InspectionDesk'
 import { ActionHUD } from './components/hud/ActionHUD'
@@ -24,9 +25,53 @@ function App() {
 
   const { phase, lives, score, currentDay, unlockedRules } = gameState
 
+  // Fullscreen state for mobile
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false)
+  const fullscreenElementRef = useRef<HTMLDivElement>(null)
+
+  // Detect mobile device and check fullscreen support
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      // Show prompt only on mobile devices that support fullscreen
+      if (mobile && document.fullscreenEnabled) {
+        setShowFullscreenPrompt(true)
+      }
+    }
+    checkMobile()
+  }, [])
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fullscreen = document.fullscreenElement === fullscreenElementRef.current
+      setIsFullscreen(fullscreen)
+      if (fullscreen) {
+        setShowFullscreenPrompt(false)
+      }
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  const requestFullscreen = useCallback(async () => {
+    try {
+      if (fullscreenElementRef.current) {
+        await fullscreenElementRef.current.requestFullscreen({
+          navigationUI: 'hide' // Hide browser UI on mobile
+        })
+      }
+    } catch (error) {
+      console.warn('Fullscreen request failed:', error)
+      // If fullscreen fails, hide prompt anyway so user can play
+      setShowFullscreenPrompt(false)
+    }
+  }, [])
+
   // Keyboard shortcuts
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Ignore if typing in input
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
 
     if (feedbackTicket.isOpen) {
@@ -55,11 +100,6 @@ function App() {
       case 'm':
         e.preventDefault()
         toggleTool('manual')
-        break
-      case 'r':
-        e.preventDefault()
-        // Reset document positions - could dispatch event
-        window.dispatchEvent(new CustomEvent('reset-documents'))
         break
     }
   }, [feedbackTicket.isOpen, handleStamp, nextCase, toggleTool])
@@ -92,16 +132,98 @@ function App() {
   }, [restartGame])
 
   const handleContinueDay = useCallback(() => {
-    // For day report, restart to next day (placeholder - would load day 2 cases)
     restartGame()
   }, [restartGame])
 
   return (
     <AnimatePresence mode="wait">
-      <div className="flex flex-col h-[100dvh] max-w-md mx-auto overflow-hidden bg-slate-950 text-slate-100 relative">
-        {/* Main Game Layout */}
-        {phase === 'playing' && currentCase && (
-          <>
+      {/* Mobile Fullscreen Prompt Overlay */}
+      {showFullscreenPrompt && !isFullscreen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 backdrop-blur-sm text-slate-100"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="fullscreen-prompt-title"
+        >
+          <div className="text-center px-6 max-w-xs">
+            <div className="mb-6 flex justify-center">
+              <div className="relative w-24 h-24">
+                <svg
+                  className="absolute inset-0 w-full h-full text-slate-600 animate-pulse"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                </svg>
+                <MousePointerClick
+                  className="absolute inset-0 w-full h-full text-amber-400 animate-bounce"
+                  size={48}
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+            <h2 id="fullscreen-prompt-title" className="text-xl md:text-2xl font-bold mb-3 tracking-tight">
+              Toque para iniciar em Tela Cheia
+            </h2>
+            <p className="text-slate-400 mb-6 leading-relaxed">
+              Para a melhor experiência, o jogo entrará em modo tela cheia.
+              Isso remove as barras do navegador e usa toda a tela do seu dispositivo.
+            </p>
+            <button
+              onClick={requestFullscreen}
+              className="w-full py-4 px-6 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-semibold rounded-lg transition-colors touch-manipulation select-none"
+              type="button"
+            >
+              Entrar em Tela Cheia
+            </button>
+            <p className="mt-4 text-xs text-slate-500">
+              Funciona melhor com o dispositivo na horizontal (landscape).
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Portrait Lock Overlay - only show when not in fullscreen prompt */}
+      {!showFullscreenPrompt && (
+        <div className="portrait-lock" aria-hidden="true" role="alert">
+          <svg
+            className="portrait-lock__icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+            <line x1="12" y1="18" x2="12.01" y2="18" />
+            <path d="M8 2v2M16 2v2M8 20v2M16 20v2" />
+          </svg>
+          <h2 className="portrait-lock__title">Gire o seu celular para jogar</h2>
+          <p className="portrait-lock__message">
+            Este jogo foi projetado para ser jogado na horizontal (landscape).
+            Vire o dispositivo para continuar.
+          </p>
+        </div>
+      )}
+
+      {/* Main Game Content - Flexbox layout without fixed heights */}
+      <div
+        ref={fullscreenElementRef}
+        className={`game-content flex flex-col overflow-hidden bg-slate-950 text-slate-100 touch-manipulation select-none ${
+          isFullscreen ? 'h-[100dvh] w-[100dvw] fixed inset-0 z-[50]' : 'h-[100dvh] w-full'
+        }`}
+        style={isFullscreen ? { position: 'fixed', top: 0, left: 0 } : undefined}
+      >
+        {/* === TOP: Booth - Auto height based on content === */}
+        <div className="flex-shrink-0">
+          {phase === 'playing' && currentCase && (
             <Booth
               currentCase={currentCase}
               lives={lives}
@@ -109,11 +231,38 @@ function App() {
               currentDay={currentDay}
               avatarState="traveler"
             />
+          )}
+          {phase === 'playing' && !currentCase && (
+            <div className="flex h-24 items-center justify-center bg-slate-950">
+              <p className="text-slate-500">Carregando próximo viajante...</p>
+            </div>
+          )}
+          {phase !== 'playing' && (
+            <div className="flex h-24 items-center justify-center bg-slate-950">
+              <p className="text-slate-500">Aguardando...</p>
+            </div>
+          )}
+        </div>
+
+        {/* === CENTER: Document Area - Takes remaining space === */}
+        <div className="flex-1 min-h-0 relative">
+          {phase === 'playing' && currentCase && (
             <InspectionDesk
               currentCase={currentCase}
               xrayActive={isToolActive('xray')}
               onFieldInspect={() => {}}
             />
+          )}
+          {phase === 'playing' && !currentCase && (
+            <div className="flex h-full items-center justify-center bg-slate-950">
+              <p className="text-slate-500">Nenhum documento para inspecionar</p>
+            </div>
+          )}
+        </div>
+
+        {/* === BOTTOM: Action HUD - Fixed compact height === */}
+        <div className="flex-shrink-0 h-[92px] max-h-[92px]">
+          {phase === 'playing' && (
             <ActionHUD
               onApprove={() => handleStamp('approve')}
               onDeny={() => handleStamp('deny')}
@@ -122,14 +271,8 @@ function App() {
               disabled={false}
               showFeedback={feedbackTicket.isOpen}
             />
-          </>
-        )}
-
-        {phase === 'playing' && !currentCase && (
-          <div className="flex flex-col h-full items-center justify-center bg-slate-950">
-            <p className="text-slate-500">Carregando próximo viajante...</p>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Modals - rendered on top */}
         <AnimatePresence>
@@ -149,7 +292,7 @@ function App() {
               casesTotal={gameState.completedCases.length}
               casesCorrect={gameState.completedCases.filter((c) => c.correctDecision === 'approve').length + 
                             gameState.completedCases.filter((c) => c.correctDecision === 'deny').length - 
-                            (gameState.lives < 3 ? 1 : 0)} // approximation
+                            (gameState.lives < 3 ? 1 : 0)}
               casesIncorrect={3 - lives > 0 ? 3 - lives : 0}
               totalScore={score}
               livesRemaining={lives}
