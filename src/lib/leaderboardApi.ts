@@ -29,6 +29,9 @@ export function reportScore(payload: {
 
 export async function fetchLeaderboard(): Promise<LeaderboardEntry[]> {
   const res = await fetch('/api/leaderboard')
-  if (!res.ok) throw new Error('leaderboard unavailable')
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null
+    throw new Error(body?.error ?? 'leaderboard unavailable')
+  }
   return (await res.json()) as LeaderboardEntry[]
 }

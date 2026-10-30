@@ -40,8 +40,18 @@ interface UseGameEngineReturn {
   isToolActive: (tool: ToolType) => boolean
 }
 
+/** Embaralha (Fisher-Yates) sem alterar o array original */
+function shuffle<T>(items: readonly T[]): T[] {
+  const result = [...items]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
 function createDayState(day: DayNumber, score = 0, lives = 3): GameState {
-  const cases = getCasesForDay(day)
+  const cases = shuffle(getCasesForDay(day))
   const rules = getRulesForDay(day)
 
   return {

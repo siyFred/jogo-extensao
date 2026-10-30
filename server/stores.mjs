@@ -62,5 +62,12 @@ function buildStore() {
     const deployment = env.VERCEL_DEPLOYMENT_ID || env.VERCEL_URL || 'local'
     return createUpstashStore(url, token, `leaderboard:${deployment}`)
   }
+  if (env.VERCEL) {
+    // Na Vercel a memória não é compartilhada entre funções: falhar alto em vez de perder dados em silêncio.
+    const fail = async () => {
+      throw new Error('storage_not_configured')
+    }
+    return { kind: 'unconfigured', getAll: fail, get: fail, set: fail }
+  }
   return createMemoryStore()
 }

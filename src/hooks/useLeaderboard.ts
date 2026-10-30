@@ -7,6 +7,8 @@ export interface LeaderboardView {
   /** Variação de posição recente por jogador (positivo = subiu, negativo = caiu) */
   rankDeltas: Record<string, number>
   connected: boolean
+  /** true quando o servidor está sem banco (Redis) configurado */
+  notConfigured: boolean
 }
 
 const POLL_INTERVAL_MS = 2000
@@ -17,6 +19,7 @@ export function useLeaderboard(): LeaderboardView {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
   const [rankDeltas, setRankDeltas] = useState<Record<string, number>>({})
   const [connected, setConnected] = useState(false)
+  const [notConfigured, setNotConfigured] = useState(false)
   const prevRanks = useRef<Map<string, number>>(new Map())
   const timers = useRef<Map<string, number>>(new Map())
 
@@ -59,9 +62,12 @@ export function useLeaderboard(): LeaderboardView {
         const next = await fetchLeaderboard()
         if (cancelled) return
         setConnected(true)
+        setNotConfigured(false)
         apply(next)
-      } catch {
-        if (!cancelled) setConnected(false)
+      } catch (error) {
+        if (cancelled) return
+        setConnected(false)
+        setNotConfigured(error instanceof Error && error.message === 'storage_not_configured')
       }
     }
 
@@ -75,5 +81,5 @@ export function useLeaderboard(): LeaderboardView {
     }
   }, [])
 
-  return { entries, rankDeltas, connected }
+  return { entries, rankDeltas, connected, notConfigured }
 }

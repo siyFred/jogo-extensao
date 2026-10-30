@@ -11,7 +11,10 @@ export default async function handler(req, res) {
     const result = await scorePlayer(store, body ?? {})
     res.setHeader('Cache-Control', 'no-store')
     res.status(result.status).json(result.body)
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'storage_not_configured') {
+      return res.status(503).json({ error: 'storage_not_configured' })
+    }
     res.status(500).json({ error: 'server error' })
   }
 }

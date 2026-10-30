@@ -12,7 +12,7 @@ const statusConfig: Record<PlayerStatus, { label: string; className: string; ico
 const podiumColor = ['text-amber-300', 'text-slate-300', 'text-orange-400']
 
 export function LeaderboardPage() {
-  const { entries, rankDeltas, connected } = useLeaderboard()
+  const { entries, rankDeltas, connected, notConfigured } = useLeaderboard()
 
   return (
     <div className="h-[100dvh] w-full overflow-y-auto bg-slate-950 text-slate-100">
@@ -38,6 +38,12 @@ export function LeaderboardPage() {
             {connected ? 'AO VIVO' : 'RECONECTANDO'}
           </div>
         </header>
+
+        {notConfigured && (
+          <div className="mb-3 rounded-xl border border-red-600/40 bg-red-900/30 p-3 text-sm text-red-200">
+            O servidor está sem banco de dados configurado (variáveis UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN).
+          </div>
+        )}
 
         {entries.length === 0 ? (
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 py-16 text-center text-slate-500">
