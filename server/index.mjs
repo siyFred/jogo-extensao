@@ -1,18 +1,17 @@
 // Servidor leve do placar. Sem dependências: serve o build (dist/) e guarda os jogadores
-// APENAS EM MEMÓRIA — qualquer redeploy/reinício do processo zera o placar.
+// em memória (ou Redis, se configurado) — reiniciar o processo zera o placar.
 import http from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createStore } from './stores.mjs'
+import { joinPlayer, listPlayers, scorePlayer } from './leaderboardCore.mjs'
 
 const PORT = Number(process.env.PORT) || 3001
 const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist')
 
-/** @type {Map<string, {name:string,score:number,best:number,lives:number,day:number,status:string,attempts:number,updatedAt:number}>} */
-const players = new Map()
-/** @type {Set<import('node:http').ServerResponse>} */
-const clients = new Set()
+const store = createStore()
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -22,21 +21,6 @@ const MIME = {
   '.png': 'image/png',
   '.ico': 'image/x-icon',
   '.json': 'application/json; charset=utf-8',
-}
-
-const keyOf = (name) => name.trim().toLowerCase()
-const cleanName = (raw) => (typeof raw === 'string' ? raw.trim().replace(/\s+/g, ' ').slice(0, 16) : '')
-const num = (v, min, max) => Math.min(max, Math.max(min, Math.floor(Number(v) || 0)))
-
-function snapshot() {
-  return [...players.values()].sort(
-    (a, b) => b.score - a.score || b.best - a.best || a.updatedAt - b.updatedAt,
-  )
-}
-
-function broadcast() {
-  const data = `data: ${JSON.stringify(snapshot())}\n\n`
-  for (const res of clients) res.write(data)
 }
 
 function readBody(req) {
@@ -66,24 +50,7 @@ function json(res, status, body) {
 }
 
 async function handleApi(req, res, pathname) {
-  if (req.method === 'GET' && pathname === '/api/leaderboard') return json(res, 200, snapshot())
-
-  if (req.method === 'GET' && pathname === '/api/leaderboard/stream') {
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-      'X-Accel-Buffering': 'no',
-    })
-    res.write(`data: ${JSON.stringify(snapshot())}\n\n`)
-    clients.add(res)
-    const ping = setInterval(() => res.write(': ping\n\n'), 25_000)
-    req.on('close', () => {
-      clearInterval(ping)
-      clients.delete(res)
-    })
-    return
-  }
+  if (req.method === 'GET' && pathname === '/api/leaderboard') return json(res, 200, await listPlayers(store))
 
   if (req.method === 'POST' && (pathname === '/api/join' || pathname === '/api/score')) {
     let body
@@ -92,43 +59,8 @@ async function handleApi(req, res, pathname) {
     } catch {
       return json(res, 400, { error: 'invalid body' })
     }
-    const name = cleanName(body.name)
-    if (name.length < 2) return json(res, 400, { error: 'name too short' })
-    const key = keyOf(name)
-    const existing = players.get(key)
-
-    if (pathname === '/api/join') {
-      // Entrar/tentar de novo: nova rodada zerada, mantendo recorde e nº de tentativas.
-      const entry = {
-        name: existing?.name ?? name,
-        score: 0,
-        best: existing?.best ?? 0,
-        lives: 3,
-        day: 1,
-        status: 'playing',
-        attempts: (existing?.attempts ?? 0) + 1,
-        updatedAt: Date.now(),
-      }
-      players.set(key, entry)
-      broadcast()
-      return json(res, 200, entry)
-    }
-
-    if (!existing) return json(res, 404, { error: 'unknown player' })
-    const score = num(body.score, 0, 1_000_000)
-    const status = ['playing', 'game_over', 'finished'].includes(body.status) ? body.status : 'playing'
-    const entry = {
-      ...existing,
-      score,
-      best: Math.max(existing.best, score),
-      lives: num(body.lives, 0, 3),
-      day: num(body.day, 1, 5),
-      status,
-      updatedAt: Date.now(),
-    }
-    players.set(key, entry)
-    broadcast()
-    return json(res, 200, entry)
+    const result = await (pathname === '/api/join' ? joinPlayer : scorePlayer)(store, body)
+    return json(res, result.status, result.body)
   }
 
   return json(res, 404, { error: 'not found' })
