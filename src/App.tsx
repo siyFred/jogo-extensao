@@ -20,6 +20,8 @@ function App() {
     closeFeedback,
     nextCase,
     restartGame,
+    startNextDay,
+    hasNextDay,
     toggleTool,
     isToolActive,
   } = useGameEngine()
@@ -116,7 +118,8 @@ function App() {
     setPlayerName(null)
   }, [restartGame])
 
-  const handleContinueDay = handleRestart
+  // Próximo dia (mantém pontos e vidas) ou, se não há mais conteúdo, jogar de novo
+  const handleContinueDay = hasNextDay ? startNextDay : handleRestart
 
   if (!playerName) {
     return <NameEntryScreen onSubmit={handleStartGame} />
@@ -183,15 +186,16 @@ function App() {
           {phase === 'day_report' && (
             <DayReportModal
               day={currentDay}
-              casesTotal={gameState.completedCases.length}
-              casesCorrect={gameState.completedCases.filter((c) => c.correctDecision === 'approve').length + 
-                            gameState.completedCases.filter((c) => c.correctDecision === 'deny').length - 
-                            (gameState.lives < 3 ? 1 : 0)}
-              casesIncorrect={3 - lives > 0 ? 3 - lives : 0}
+              casesTotal={gameState.dayResults.length}
+              casesCorrect={gameState.dayResults.filter((r) => r.isCorrect).length}
+              casesIncorrect={gameState.dayResults.filter((r) => !r.isCorrect).length}
+              approvedCorrect={gameState.dayResults.filter((r) => r.isCorrect && r.decision === 'approve').length}
+              deniedCorrect={gameState.dayResults.filter((r) => r.isCorrect && r.decision === 'deny').length}
               totalScore={score}
               livesRemaining={lives}
               unlockedRules={unlockedRules}
-              perfectDay={lives === 3 && gameState.completedCases.length > 0}
+              perfectDay={gameState.dayResults.length > 0 && gameState.dayResults.every((r) => r.isCorrect)}
+              hasNextDay={hasNextDay}
               onContinue={handleContinueDay}
               onRestart={handleRestart}
             />

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import type {
   TravelerCase,
   GameState,
@@ -6,6 +6,7 @@ import type {
   Discrepancy,
   ToolType,
   CaseEvaluation,
+  DayNumber,
 } from '../types/game'
 import { getCasesForDay } from '../data/cases'
 import { getRulesForDay } from '../data/manualRules'
@@ -32,32 +33,43 @@ interface UseGameEngineReturn {
   closeFeedback: () => void
   nextCase: () => void
   restartGame: () => void
+  startNextDay: () => void
+  hasNextDay: boolean
   // Ferramentas
   toggleTool: (tool: ToolType) => void
   isToolActive: (tool: ToolType) => boolean
 }
 
-function createInitialGameState(): GameState {
-  const day1Cases = getCasesForDay(1)
-  const day1Rules = getRulesForDay(1)
-  
+function createDayState(day: DayNumber, score = 0, lives = 3): GameState {
+  const cases = getCasesForDay(day)
+  const rules = getRulesForDay(day)
+
   return {
-    currentDay: 1,
+    currentDay: day,
     currentCaseIndex: 0,
-    dailyCases: day1Cases,
+    dailyCases: cases,
     completedCases: [],
-    lives: 3,
-    score: 0,
+    dayResults: [],
+    lives,
+    score,
     phase: 'playing',
-    unlockedRules: day1Rules,
+    unlockedRules: rules,
     availableTools: ['xray', 'manual'],
     toolsUsed: [],
     xrayActive: false,
     manualOpen: false,
-    currentCase: day1Cases[0] ?? null,
+    currentCase: cases[0] ?? null,
     playerDecision: null,
     showFeedback: false,
   }
+}
+
+function createInitialGameState(): GameState {
+  return createDayState(1)
+}
+
+function hasCasesForDay(day: number): boolean {
+  return day >= 1 && day <= 5 && getCasesForDay(day as DayNumber).length > 0
 }
 
 function evaluateCase(
@@ -107,9 +119,12 @@ export function useGameEngine(): UseGameEngineReturn {
   })
 
   const currentCase = gameState.currentCase
+  // Trava contra toque duplo: evita carimbar o mesmo caso duas vezes
+  const stampLockRef = useRef(false)
 
   const handleStamp = useCallback((decision: PlayerDecision) => {
-    if (!currentCase || feedbackTicket.isOpen) return
+    if (!currentCase || feedbackTicket.isOpen || stampLockRef.current) return
+    stampLockRef.current = true
 
     const evaluation = evaluateCase(currentCase, decision)
     const newLives = gameState.lives - evaluation.livesLost
@@ -123,6 +138,10 @@ export function useGameEngine(): UseGameEngineReturn {
       playerDecision: decision,
       showFeedback: true,
       completedCases: [...prev.completedCases, currentCase],
+      dayResults: [
+        ...prev.dayResults,
+        { caseId: currentCase.id, decision, isCorrect: evaluation.isCorrect },
+      ],
       toolsUsed: [],
       xrayActive: false,
       manualOpen: false,
@@ -146,6 +165,7 @@ export function useGameEngine(): UseGameEngineReturn {
   }, [currentCase, feedbackTicket.isOpen, gameState.lives, gameState.score])
 
   const closeFeedback = useCallback(() => {
+    stampLockRef.current = false
     setFeedbackTicket((prev) => ({ ...prev, isOpen: false }))
   }, [])
 
@@ -179,7 +199,30 @@ export function useGameEngine(): UseGameEngineReturn {
     closeFeedback()
   }, [closeFeedback])
 
+  const resetFeedback = useCallback(() => {
+    stampLockRef.current = false
+    setFeedbackTicket({
+      isOpen: false,
+      isCorrect: false,
+      pointsEarned: 0,
+      livesLost: 0,
+      message: '',
+      discrepancies: [],
+      caseTitle: '',
+    })
+  }, [])
+
+  const startNextDay = useCallback(() => {
+    setGameState((prev) => {
+      const nextDay = prev.currentDay + 1
+      if (!hasCasesForDay(nextDay)) return prev
+      return createDayState(nextDay as DayNumber, prev.score, prev.lives)
+    })
+    resetFeedback()
+  }, [resetFeedback])
+
   const restartGame = useCallback(() => {
+    stampLockRef.current = false
     setGameState(createInitialGameState)
     setFeedbackTicket({
       isOpen: false,
@@ -231,6 +274,8 @@ export function useGameEngine(): UseGameEngineReturn {
     closeFeedback,
     nextCase,
     restartGame,
+    startNextDay,
+    hasNextDay: hasCasesForDay(gameState.currentDay + 1),
     toggleTool,
     isToolActive,
   }

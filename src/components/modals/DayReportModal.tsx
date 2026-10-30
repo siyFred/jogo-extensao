@@ -7,10 +7,13 @@ interface DayReportModalProps {
   casesTotal: number
   casesCorrect: number
   casesIncorrect: number
+  approvedCorrect: number
+  deniedCorrect: number
   totalScore: number
   livesRemaining: number
   unlockedRules: ManualRule[]
   perfectDay: boolean
+  hasNextDay: boolean
   onContinue: () => void
   onRestart: () => void
 }
@@ -20,10 +23,13 @@ export function DayReportModal({
   casesTotal,
   casesCorrect,
   casesIncorrect,
+  approvedCorrect,
+  deniedCorrect,
   totalScore,
   livesRemaining,
   unlockedRules,
   perfectDay,
+  hasNextDay,
   onContinue,
   onRestart,
 }: DayReportModalProps) {
@@ -39,13 +45,13 @@ export function DayReportModal({
       aria-labelledby="day-report-title"
     >
       <motion.div
-        className="relative w-full max-w-md bg-slate-900 rounded-2xl border-2 border-amber-600/50 shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md max-h-[92dvh] flex flex-col bg-slate-900 rounded-2xl border-2 border-amber-600/50 shadow-2xl overflow-hidden"
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
         {/* Header */}
-        <div className="relative p-6 bg-gradient-to-r from-amber-900/40 via-slate-900 to-amber-900/40 border-b border-amber-600/30">
+        <div className="relative flex-shrink-0 p-4 sm:p-6 bg-gradient-to-r from-amber-900/40 via-slate-900 to-amber-900/40 border-b border-amber-600/30">
           <div className="absolute inset-0 opacity-10" aria-hidden="true">
             <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
               <defs>
@@ -80,7 +86,7 @@ export function DayReportModal({
         </div>
 
         {/* Stats Grid */}
-        <div className="p-6 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-4 sm:p-6 space-y-5">
           <motion.div
             className="grid grid-cols-2 gap-4"
             initial={{ opacity: 0, y: 20 }}
@@ -126,11 +132,11 @@ export function DayReportModal({
             </h3>
             <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700">
               <span className="text-sm text-slate-300">Aprovados corretamente</span>
-              <span className="font-mono text-green-300">{casesCorrect}</span>
+              <span className="font-mono text-green-300">{approvedCorrect}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700">
               <span className="text-sm text-slate-300">Barrados corretamente</span>
-              <span className="font-mono text-green-300">{casesTotal - casesCorrect - casesIncorrect}</span>
+              <span className="font-mono text-green-300">{deniedCorrect}</span>
             </div>
             {casesIncorrect > 0 && (
               <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700">
@@ -152,7 +158,7 @@ export function DayReportModal({
                 <Star className="w-4 h-4 text-amber-400" />
                 Regras Desbloqueadas (Dia {day})
               </h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+              <div className="space-y-2">
                 {unlockedRules.map((rule) => (
                   <motion.div
                     key={rule.id}
@@ -180,7 +186,7 @@ export function DayReportModal({
 
         {/* Actions */}
         <motion.div
-          className="px-6 pb-6 pt-2 flex flex-col gap-3"
+          className="flex-shrink-0 px-4 sm:px-6 pb-4 sm:pb-6 pt-3 flex flex-col gap-2 border-t border-slate-800 bg-slate-900"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -191,7 +197,7 @@ export function DayReportModal({
             whileTap={{ scale: 0.98 }}
             whileHover={{ scale: 1.01 }}
           >
-            {day < 5 ? (
+            {hasNextDay ? (
               <>
                 <ArrowRight className="w-5 h-5" />
                 Próximo Dia
@@ -199,7 +205,7 @@ export function DayReportModal({
             ) : (
               <>
                 <Star className="w-5 h-5 fill-current" />
-                Ver Relatório Final
+                Jogar Novamente
               </>
             )}
           </motion.button>
@@ -209,7 +215,7 @@ export function DayReportModal({
             className="w-full py-3 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-colors"
             whileTap={{ scale: 0.98 }}
           >
-            Reiniciar Dia {day}
+            Refazer Dia {day}
           </motion.button>
         </motion.div>
       </motion.div>

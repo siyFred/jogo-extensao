@@ -26,6 +26,13 @@ export type ValidationResult = 'valid' | 'invalid' | 'suspicious' | 'unknown'
 /** Player's decision on a case */
 export type PlayerDecision = 'approve' | 'deny'
 
+/** Resultado de um caso já decidido pelo jogador */
+export interface CaseResult {
+  caseId: string
+  decision: PlayerDecision
+  isCorrect: boolean
+}
+
 /** Correct decision for a case */
 export type CorrectDecision = 'approve' | 'deny'
 
@@ -164,6 +171,8 @@ export interface GameState {
   dailyCases: TravelerCase[]
   /** All cases completed so far */
   completedCases: TravelerCase[]
+  /** Results of the decisions made in the current day */
+  dayResults: CaseResult[]
   /** Player's lives remaining (0-3) */
   lives: number
   /** Player's total score */
