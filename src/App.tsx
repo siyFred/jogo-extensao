@@ -92,7 +92,7 @@ function App() {
   return (
     <AnimatePresence mode="wait">
       {/* Main Game Content - Flexbox layout without fixed heights */}
-      <div className="flex flex-col overflow-hidden bg-slate-950 text-slate-100 touch-manipulation select-none h-[100dvh] w-full max-w-md mx-auto">
+      <div className="flex flex-col overflow-hidden bg-slate-950 text-slate-100 touch-manipulation select-none h-[100dvh] w-full max-w-md mx-auto lg:max-w-none">
         {/* === TOPO: status === */}
         {phase === 'playing' && currentCase ? (
           <Booth lives={lives} score={score} currentDay={currentDay} />

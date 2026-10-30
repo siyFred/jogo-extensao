@@ -46,7 +46,7 @@ export function ActionHUD({
   }
 
   return (
-    <div className="w-full flex items-stretch gap-2 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-slate-900/90 backdrop-blur-sm border-t border-slate-800">
+    <div className="w-full flex items-stretch gap-2 px-2 lg:px-[22%] pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-slate-900/90 backdrop-blur-sm border-t border-slate-800">
       {/* Ferramenta (esquerda): Raio-X */}
       {tools.slice(0, 1).map((t) => renderTool(t))}
 
