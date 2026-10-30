@@ -182,72 +182,36 @@ function App() {
               Entrar em Tela Cheia
             </button>
             <p className="mt-4 text-xs text-slate-500">
-              Funciona melhor com o dispositivo na horizontal (landscape).
+              Funciona em retrato ou paisagem.
             </p>
           </div>
-        </div>
-      )}
-
-      {/* Portrait Lock Overlay - only show when not in fullscreen prompt */}
-      {!showFullscreenPrompt && (
-        <div className="portrait-lock" aria-hidden="true" role="alert">
-          <svg
-            className="portrait-lock__icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-            <line x1="12" y1="18" x2="12.01" y2="18" />
-            <path d="M8 2v2M16 2v2M8 20v2M16 20v2" />
-          </svg>
-          <h2 className="portrait-lock__title">Gire o seu celular para jogar</h2>
-          <p className="portrait-lock__message">
-            Este jogo foi projetado para ser jogado na horizontal (landscape).
-            Vire o dispositivo para continuar.
-          </p>
         </div>
       )}
 
       {/* Main Game Content - Flexbox layout without fixed heights */}
       <div
         ref={fullscreenElementRef}
-        className={`game-content flex flex-col overflow-hidden bg-slate-950 text-slate-100 touch-manipulation select-none ${
-          isFullscreen ? 'h-[100dvh] w-[100dvw] fixed inset-0 z-[50]' : 'h-[100dvh] w-full'
+        className={`flex flex-col overflow-hidden bg-slate-950 text-slate-100 touch-manipulation select-none ${
+          isFullscreen ? 'h-[100dvh] w-[100dvw] fixed inset-0 z-[50]' : 'h-[100dvh] w-full max-w-md mx-auto'
         }`}
         style={isFullscreen ? { position: 'fixed', top: 0, left: 0 } : undefined}
       >
-        {/* === TOP: Booth - Auto height based on content === */}
-        <div className="flex-shrink-0">
-          {phase === 'playing' && currentCase && (
-            <Booth
-              currentCase={currentCase}
-              lives={lives}
-              score={score}
-              currentDay={currentDay}
-              avatarState="traveler"
-            />
-          )}
-          {phase === 'playing' && !currentCase && (
-            <div className="flex h-24 items-center justify-center bg-slate-950">
-              <p className="text-slate-500">Carregando próximo viajante...</p>
-            </div>
-          )}
-          {phase !== 'playing' && (
-            <div className="flex h-24 items-center justify-center bg-slate-950">
-              <p className="text-slate-500">Aguardando...</p>
-            </div>
-          )}
-        </div>
+        {/* === TOPO: status === */}
+        {phase === 'playing' && currentCase ? (
+          <Booth lives={lives} score={score} currentDay={currentDay} />
+        ) : (
+          <div className="flex h-10 flex-shrink-0 items-center justify-center bg-slate-950">
+            <p className="text-slate-500 text-xs">
+              {phase === 'playing' ? 'Carregando próximo viajante...' : 'Aguardando...'}
+            </p>
+          </div>
+        )}
 
-        {/* === CENTER: Document Area - Takes remaining space === */}
-        <div className="flex-1 min-h-0 relative">
+        {/* === CENTRO: abas + documento ativo === */}
+        <main className="flex-1 min-h-0 relative">
           {phase === 'playing' && currentCase && (
             <InspectionDesk
+              key={currentCase.id}
               currentCase={currentCase}
               xrayActive={isToolActive('xray')}
               onFieldInspect={() => {}}
@@ -258,10 +222,10 @@ function App() {
               <p className="text-slate-500">Nenhum documento para inspecionar</p>
             </div>
           )}
-        </div>
+        </main>
 
-        {/* === BOTTOM: Action HUD - Fixed compact height === */}
-        <div className="flex-shrink-0 h-[92px] max-h-[92px]">
+        {/* === BASE: carimbos fixos === */}
+        <div className="flex-shrink-0">
           {phase === 'playing' && (
             <ActionHUD
               onApprove={() => handleStamp('approve')}

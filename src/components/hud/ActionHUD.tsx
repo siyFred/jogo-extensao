@@ -23,60 +23,55 @@ export function ActionHUD({
     { id: 'manual', label: 'Manual', icon: BookOpen },
   ]
 
+  const renderTool = ({ id, label, icon: Icon }: (typeof tools)[number]) => {
+    const active = isToolActive(id)
+    return (
+      <button
+        key={id}
+        onClick={() => !disabled && onToggleTool(id)}
+        disabled={disabled || showFeedback}
+        className={`relative flex flex-col items-center justify-center gap-0.5 w-14 h-12 rounded-xl border transition-all duration-200 touch-manipulation ${
+          active
+            ? 'bg-amber-900/40 border-amber-600/50 text-amber-300'
+            : 'bg-slate-800/50 border-slate-700 text-slate-300 active:bg-slate-700/50'
+        } ${disabled || showFeedback ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        aria-pressed={active}
+        aria-label={label}
+      >
+        <Icon className={`w-4 h-4 ${active ? 'text-amber-400' : ''}`} />
+        <span className="text-[10px] font-medium leading-none">{label}</span>
+        {active && <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />}
+      </button>
+    )
+  }
+
   return (
-    <div className="h-[clamp(70px,18dvh,100px)] w-full flex flex-col bg-slate-900/80 backdrop-blur-sm border-t border-slate-800 flex-shrink-0">
-      {/* Tools Row - Top of HUD area */}
-      <div className="flex items-center justify-center gap-2 px-3 py-1.5 flex-shrink-0">
-        {tools.map(({ id, label, icon: Icon }) => {
-          const active = isToolActive(id)
-          return (
-            <button
-              key={id}
-              onClick={() => !disabled && onToggleTool(id)}
-              disabled={disabled || showFeedback}
-              className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all duration-200 ${
-                active
-                  ? 'bg-amber-900/40 border-amber-600/50 text-amber-300 shadow-lg shadow-amber-600/10'
-                  : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-slate-600 hover:bg-slate-700/50'
-              } ${disabled || showFeedback ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              aria-pressed={active}
-              aria-label={label}
-            >
-              <Icon className={`w-3.5 h-3.5 ${active ? 'text-amber-400' : ''}`} />
-              <span className="text-[10px] font-medium">{label}</span>
-              {active && (
-                <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
-              )}
-            </button>
-          )
-        })}
-      </div>
+    <div className="w-full flex items-stretch gap-2 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-slate-900/90 backdrop-blur-sm border-t border-slate-800">
+      {/* Ferramenta (esquerda): Raio-X */}
+      {tools.slice(0, 1).map((t) => renderTool(t))}
 
-      {/* Spacer - pushes stamp buttons to bottom */}
-      <div className="flex-1 min-h-0" />
+      {/* DENY - Red */}
+      <button
+        onClick={() => !disabled && !showFeedback && onDeny()}
+        disabled={disabled || showFeedback}
+        className="flex-1 flex items-center justify-center gap-1.5 h-12 rounded-xl bg-red-900/30 border-2 border-red-600/50 text-red-300 active:bg-red-900/60 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] touch-manipulation"
+      >
+        <X className="w-5 h-5" strokeWidth={3} />
+        <span className="text-sm font-bold uppercase tracking-wider">Barrar</span>
+      </button>
 
-      {/* Stamp Buttons - Fixed at bottom of HUD area */}
-      <div className="flex items-center gap-2 px-3 pb-2 pt-0.5 flex-shrink-0">
-        {/* DENY - Red */}
-        <button
-          onClick={() => !disabled && !showFeedback && onDeny()}
-          disabled={disabled || showFeedback}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-900/30 border-2 border-red-600/50 text-red-300 hover:bg-red-900/50 hover:border-red-500 hover:text-red-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
-        >
-          <X className="w-4 h-4" strokeWidth={3} />
-          <span className="text-sm font-bold uppercase tracking-wider">BARRAR</span>
-        </button>
+      {/* APPROVE - Green */}
+      <button
+        onClick={() => !disabled && !showFeedback && onApprove()}
+        disabled={disabled || showFeedback}
+        className="flex-1 flex items-center justify-center gap-1.5 h-12 rounded-xl bg-green-900/30 border-2 border-green-600/50 text-green-300 active:bg-green-900/60 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] touch-manipulation"
+      >
+        <Check className="w-5 h-5" strokeWidth={3} />
+        <span className="text-sm font-bold uppercase tracking-wider">Aprovar</span>
+      </button>
 
-        {/* APPROVE - Green */}
-        <button
-          onClick={() => !disabled && !showFeedback && onApprove()}
-          disabled={disabled || showFeedback}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-green-900/30 border-2 border-green-600/50 text-green-300 hover:bg-green-900/50 hover:border-green-500 hover:text-green-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
-        >
-          <Check className="w-4 h-4" strokeWidth={3} />
-          <span className="text-sm font-bold uppercase tracking-wider">APROVAR</span>
-        </button>
-      </div>
+      {/* Ferramenta (direita): Manual */}
+      {tools.slice(1).map((t) => renderTool(t))}
     </div>
   )
 }
