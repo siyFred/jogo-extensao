@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronRight, Shield, BookOpen, Search, Eye } from 'lucide-react'
 import type { ManualRule, ThreatCategory } from '../../types/game'
@@ -37,9 +38,10 @@ function CategoryTab({
   return (
     <motion.button
       onClick={onClick}
+      aria-pressed={isActive}
       className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
         isActive
-          ? `${config.color} text-white shadow-lg`
+          ? `${config.color} shadow-lg ring-1 ring-current`
           : 'bg-slate-800/50 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 border border-slate-700'
       }`}
       whileTap={{ scale: 0.97 }}
@@ -50,7 +52,7 @@ function CategoryTab({
       <Icon className="w-4 h-4" />
       <span>{config.label}</span>
       <span className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${
-        isActive ? 'bg-white/20 text-white' : 'bg-slate-900/50 text-slate-500'
+        isActive ? 'bg-white/20 text-current' : 'bg-slate-900/50 text-slate-500'
       }`}>
         {count}
       </span>
@@ -58,7 +60,9 @@ function CategoryTab({
   )
 }
 
-export function ManualModal({ isOpen, onClose, rules, activeCategory }: ManualModalProps) {
+export function ManualModal({ isOpen, onClose, rules, activeCategory: initialCategory }: ManualModalProps) {
+  const [activeCategory, setActiveCategory] = useState<ThreatCategory | undefined>(initialCategory)
+
   const categories: ThreatCategory[] = [
     'phishing',
     'suspicious_link',
@@ -74,10 +78,12 @@ export function ManualModal({ isOpen, onClose, rules, activeCategory }: ManualMo
     ? rules.filter((r) => r.category === activeCategory)
     : rules
 
-  const categoryCounts = categories.map((cat) => ({
-    category: cat,
-    count: rules.filter((r) => r.category === cat).length,
-  }))
+  const categoryCounts = categories
+    .map((cat) => ({
+      category: cat,
+      count: rules.filter((r) => r.category === cat).length,
+    }))
+    .filter(({ count }) => count > 0)
 
   return (
     <AnimatePresence>
@@ -132,20 +138,25 @@ export function ManualModal({ isOpen, onClose, rules, activeCategory }: ManualMo
                     key={category}
                     category={category}
                     isActive={activeCategory === category}
-                    onClick={() => {}}
+                    onClick={() => setActiveCategory(activeCategory === category ? undefined : category)}
                     count={count}
                   />
                 ))}
                 <motion.button
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/50 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 border border-slate-700 text-sm font-medium"
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all duration-200 ${
+                    !activeCategory
+                      ? 'bg-slate-200 text-slate-900 border-slate-200 shadow-lg'
+                      : 'bg-slate-800/50 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 border-slate-700'
+                  }`}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => {}}
+                  onClick={() => setActiveCategory(undefined)}
+                  aria-pressed={!activeCategory}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                 >
                   <span>Todas</span>
-                  <span className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-900/50 text-slate-500">
+                  <span className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${!activeCategory ? 'bg-slate-900/15 text-slate-700' : 'bg-slate-900/50 text-slate-500'}`}>
                     {rules.length}
                   </span>
                 </motion.button>
@@ -168,7 +179,11 @@ export function ManualModal({ isOpen, onClose, rules, activeCategory }: ManualMo
                 filteredRules.map((rule, index) => (
                   <motion.div
                     key={rule.id}
-                    className="group relative p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-amber-600/30 transition-all duration-200"
+                    className={`group relative p-4 rounded-xl border transition-all duration-200 ${
+                      activeCategory
+                        ? `${categoryConfig[rule.category].color}`
+                        : 'bg-slate-800/50 border-slate-700/50 hover:border-amber-600/30'
+                    }`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 * index }}
@@ -180,10 +195,13 @@ export function ManualModal({ isOpen, onClose, rules, activeCategory }: ManualMo
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <h3 className="font-semibold text-slate-100">{rule.title}</h3>
                           <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-amber-900/30 text-amber-300 border border-amber-600/30">
                             Dia {rule.unlockedDay}
+                          </span>
+                          <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${categoryConfig[rule.category].color}`}>
+                            {categoryConfig[rule.category].label}
                           </span>
                         </div>
                         <p className="text-sm text-slate-300 leading-relaxed mb-3">{rule.description}</p>
@@ -213,12 +231,6 @@ export function ManualModal({ isOpen, onClose, rules, activeCategory }: ManualMo
               )}
             </div>
 
-            {/* Footer hint */}
-            <div className="px-4 pb-4 pt-2 border-t border-slate-700/50">
-              <p className="text-center text-xs text-slate-500 font-mono">
-                Pressione M para fechar • Regras desbloqueiam conforme você avança nos dias
-              </p>
-            </div>
           </motion.div>
         </motion.div>
       )}
