@@ -36,7 +36,7 @@ export function Booth({
 
   return (
     <motion.section
-      className="flex flex-col w-full bg-slate-900/40 backdrop-blur-sm border-b border-slate-800 flex-shrink-0"
+      className="flex flex-col w-full bg-slate-900/40 backdrop-blur-sm border-b border-slate-800 flex-shrink-0 h-[clamp(100px,20dvh,140px)]"
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 100, damping: 15 }}
