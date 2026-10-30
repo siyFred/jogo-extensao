@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useGameEngine } from './hooks/useGameEngine'
 import { Booth } from './components/booth/Booth'
@@ -8,6 +8,8 @@ import { FeedbackModal } from './components/modals/FeedbackModal'
 import { DayReportModal } from './components/modals/DayReportModal'
 import { GameOverModal } from './components/modals/GameOverModal'
 import { ManualModal } from './components/modals/ManualModal'
+import { NameEntryScreen } from './components/screens/NameEntryScreen'
+import { joinLeaderboard, reportScore } from './lib/leaderboardApi'
 
 function App() {
   const {
@@ -24,8 +26,33 @@ function App() {
 
   const { phase, lives, score, currentDay, unlockedRules } = gameState
 
+  // Nome do jogador (null = tela de nome)
+  const [playerName, setPlayerName] = useState<string | null>(null)
+
+  // Sincroniza pontuação/vidas com o placar ao vivo
+  useEffect(() => {
+    if (!playerName) return
+    void reportScore({
+      name: playerName,
+      score,
+      lives,
+      day: currentDay,
+      status: phase === 'game_over' ? 'game_over' : phase === 'day_report' ? 'finished' : 'playing',
+    })
+  }, [playerName, score, lives, currentDay, phase])
+
+  const handleStartGame = useCallback(
+    async (name: string) => {
+      await joinLeaderboard(name)
+      restartGame()
+      setPlayerName(name)
+    },
+    [restartGame],
+  )
+
   // Keyboard shortcuts
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!playerName) return
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
 
     if (feedbackTicket.isOpen) {
@@ -56,7 +83,7 @@ function App() {
         toggleTool('manual')
         break
     }
-  }, [feedbackTicket.isOpen, handleStamp, nextCase, toggleTool])
+  }, [playerName, feedbackTicket.isOpen, handleStamp, nextCase, toggleTool])
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
@@ -77,17 +104,23 @@ function App() {
     nextCase()
   }, [closeFeedback, nextCase])
 
+  // Tentar novamente: mesmo nome, rodada zerada
   const handleRestart = useCallback(() => {
+    if (playerName) void joinLeaderboard(playerName)
     restartGame()
-  }, [restartGame])
+  }, [playerName, restartGame])
 
+  // Menu principal: volta para a tela de nome
   const handleMainMenu = useCallback(() => {
     restartGame()
+    setPlayerName(null)
   }, [restartGame])
 
-  const handleContinueDay = useCallback(() => {
-    restartGame()
-  }, [restartGame])
+  const handleContinueDay = handleRestart
+
+  if (!playerName) {
+    return <NameEntryScreen onSubmit={handleStartGame} />
+  }
 
   return (
     <AnimatePresence mode="wait">

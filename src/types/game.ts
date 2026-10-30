@@ -235,3 +235,18 @@ export interface DayConfig {
   availableTools: ToolType[]
   timeLimit?: number // seconds per case, optional
 }
+
+/** Situação de um jogador no placar */
+export type PlayerStatus = 'playing' | 'game_over' | 'finished'
+
+/** Linha do placar em tempo real (/leaderboard) */
+export interface LeaderboardEntry {
+  name: string
+  score: number
+  best: number
+  lives: number
+  day: number
+  status: PlayerStatus
+  attempts: number
+  updatedAt: number
+}
