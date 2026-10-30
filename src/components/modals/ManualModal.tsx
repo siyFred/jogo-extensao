@@ -11,13 +11,13 @@ interface ManualModalProps {
 }
 
 const categoryConfig: Record<ThreatCategory, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  phishing: { label: 'Phishing', icon: Shield, color: 'text-red-400 bg-red-900/30 border-red-600/30' },
-  malware: { label: 'Malware', icon: Search, color: 'text-orange-400 bg-orange-900/30 border-orange-600/30' },
-  social_engineering: { label: 'Eng. Social', icon: Eye, color: 'text-amber-400 bg-amber-900/30 border-amber-600/30' },
-  data_leak: { label: 'Vazamento', icon: BookOpen, color: 'text-blue-400 bg-blue-900/30 border-blue-600/30' },
-  impersonation: { label: 'Impersonação', icon: Shield, color: 'text-purple-400 bg-purple-900/30 border-purple-600/30' },
-  suspicious_link: { label: 'Links Suspeitos', icon: Search, color: 'text-green-400 bg-green-900/30 border-green-600/30' },
-  fake_identity: { label: 'Identidade Falsa', icon: Shield, color: 'text-pink-400 bg-pink-900/30 border-pink-600/30' },
+  phishing: { label: 'Golpe de Mensagem', icon: Shield, color: 'text-red-400 bg-red-900/30 border-red-600/30' },
+  malware: { label: 'Vírus', icon: Search, color: 'text-orange-400 bg-orange-900/30 border-orange-600/30' },
+  social_engineering: { label: 'Pressão e Medo', icon: Eye, color: 'text-amber-400 bg-amber-900/30 border-amber-600/30' },
+  data_leak: { label: 'Dados Vazados', icon: BookOpen, color: 'text-blue-400 bg-blue-900/30 border-blue-600/30' },
+  impersonation: { label: 'Falsa Identidade', icon: Shield, color: 'text-purple-400 bg-purple-900/30 border-purple-600/30' },
+  suspicious_link: { label: 'Links Falsos', icon: Search, color: 'text-green-400 bg-green-900/30 border-green-600/30' },
+  fake_identity: { label: 'Documento Falso', icon: Shield, color: 'text-pink-400 bg-pink-900/30 border-pink-600/30' },
   none: { label: 'Geral', icon: BookOpen, color: 'text-slate-400 bg-slate-800/50 border-slate-700' },
 }
 
@@ -173,7 +173,7 @@ export function ManualModal({ isOpen, onClose, rules, activeCategory: initialCat
                 >
                   <BookOpen className="w-12 h-12 mb-4 opacity-30" />
                   <p className="text-lg font-medium">Nenhuma regra nesta categoria</p>
-                  <p className="text-sm mt-1">Selecione outra aba ou continue jogando para desbloquear mais regras.</p>
+                  <p className="text-sm mt-1">Escolha outra etiqueta ou continue jogando para liberar mais dicas.</p>
                 </motion.div>
               ) : (
                 filteredRules.map((rule, index) => (
